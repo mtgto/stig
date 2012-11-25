@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'net/irc'
+require 'shellwords'
 
 class Stig::Server < Net::IRC::Server::Session
   def server_name
@@ -13,24 +14,36 @@ class Stig::Server < Net::IRC::Server::Session
   def on_user(m)
     super
 
-    p 'on_user', m
     post @prefix, JOIN, '#timeline'
     begin
       @thread = Thread.new do
-        IO.popen("ls").each_line{|l|
-          post @prefix, PRIVMSG, '#timeline', l.strip
+        user_id = nil
+        lines = []
+        IO.popen("t stream -N timeline").each_line{|l|
+          l.strip!
+          if user_id.nil? && l =~ /^@(.+)/
+            user_id = $1
+          elsif l.size > 0
+            lines << l
+          else
+            lines.map{|l|
+              prefix = "#{user_id}!#{user_id}@twitter"
+              post prefix, PRIVMSG, '#timeline', l
+            }
+            lines = []
+            user_id = nil
+          end
         }
       end
     end
   end
 
   def on_disconnected
-    p 'on_disconnected'
     @thread.kill rescue nil
   end
 
   def on_privmsg(m)
     target, msg = *m.params
-    p 'on_privmsg', m
+    system('t', 'update', msg)
   end
 end
