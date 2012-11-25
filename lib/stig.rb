@@ -1,5 +1,5 @@
 require "stig/version"
 
 module Stig
-  # Your code goes here...
+  autoload :Server, 'stig/server'
 end
