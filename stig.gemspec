@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- encoding: utf-8; mode: ruby -*-
 require File.expand_path('../lib/stig/version', __FILE__)
 
 Gem::Specification.new do |gem|
@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "stig"
   gem.require_paths = ["lib"]
   gem.version       = Stig::VERSION
+
+  gem.add_dependency "net-irc", "~> 0.0.9"
 end
